@@ -108,7 +108,7 @@ export function getParent(tile) {
 }
 
 /**
- * Get the 3 sibling tiles for a tile
+ * Get the 4 sibling tiles for a tile
  *
  * @name getSiblings
  * @param {Array<number>} tile
