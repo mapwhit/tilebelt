@@ -1,19 +1,23 @@
-tilebelt
+[![NPM version][npm-image]][npm-url]
+[![Build Status][build-image]][build-url]
+
+@mapwhit/tilebelt
 ====
-[![Build Status](https://travis-ci.org/mapbox/tilebelt.svg?branch=master)](https://travis-ci.org/mapbox/tilebelt) [![Coverage Status](https://coveralls.io/repos/mapbox/tilebelt/badge.svg?branch=use-tap)](https://coveralls.io/r/mapbox/tilebelt?branch=use-tap)
+
+Fork of [@mapbox/tilebelt](https://npmjs.org/package/@mapbox/tilebelt)
 
 simple [tile](http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) utilities
 
 ## install
 
 ```bash
-npm install @mapbox/tilebelt
+npm install @mapwhit/tilebelt
 ```
 
 ## usage
 
 ```js
-import * as tilebelt from '@mapbox/tilebelt';
+import * as tilebelt from '@mapwhit/tilebelt';
 
 const tile = [10, 15, 8]; // x, y, z
 
@@ -48,5 +52,11 @@ npm test
 ## benchmarks
 
 ```bash
-npm run bench
+make bench
 ```
+
+[npm-image]: https://img.shields.io/npm/v/@mapwhit/tilebelt
+[npm-url]: https://npmjs.org/package/@mapwhit/tilebelt
+
+[build-url]: https://github.com/mapwhit/tilebelt/actions/workflows/check.yaml
+[build-image]: https://img.shields.io/github/actions/workflow/status/mapwhit/tilebelt/check.yaml?branch=main
