@@ -1,6 +1,6 @@
 {
   "name": "@mapwhit/tilebelt",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "simple tile utilities",
   "type": "module",
   "exports": "./index.js",
