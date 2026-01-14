@@ -1,24 +1,22 @@
-'use strict';
-
-var d2r = Math.PI / 180,
-    r2d = 180 / Math.PI;
+const d2r = Math.PI / 180;
+const r2d = 180 / Math.PI;
 
 /**
  * Get the bbox of a tile
  *
  * @name tileToBBOX
  * @param {Array<number>} tile
- * @returns {Array<number>} bbox
+ * @returns {Array<number>} bbox [west, south, east, north]
  * @example
- * var bbox = tileToBBOX([5, 10, 10])
+ * const bbox = tileToBBOX([5, 10, 10])
  * //=bbox
  */
-function tileToBBOX(tile) {
-    var e = tile2lon(tile[0] + 1, tile[2]);
-    var w = tile2lon(tile[0], tile[2]);
-    var s = tile2lat(tile[1] + 1, tile[2]);
-    var n = tile2lat(tile[1], tile[2]);
-    return [w, s, e, n];
+export function tileToBBOX(tile) {
+  const e = tile2lon(tile[0] + 1, tile[2]);
+  const w = tile2lon(tile[0], tile[2]);
+  const s = tile2lat(tile[1] + 1, tile[2]);
+  const n = tile2lat(tile[1], tile[2]);
+  return [w, s, e, n];
 }
 
 /**
@@ -26,33 +24,35 @@ function tileToBBOX(tile) {
  *
  * @name tileToGeoJSON
  * @param {Array<number>} tile
- * @returns {Feature<Polygon>}
+ * @returns {Object} polygon
  * @example
- * var poly = tileToGeoJSON([5, 10, 10])
+ * const poly = tileToGeoJSON([5, 10, 10])
  * //=poly
  */
-function tileToGeoJSON(tile) {
-    var bbox = tileToBBOX(tile);
-    var poly = {
-        type: 'Polygon',
-        coordinates: [[
-            [bbox[0], bbox[3]],
-            [bbox[0], bbox[1]],
-            [bbox[2], bbox[1]],
-            [bbox[2], bbox[3]],
-            [bbox[0], bbox[3]]
-        ]]
-    };
-    return poly;
+export function tileToGeoJSON(tile) {
+  var bbox = tileToBBOX(tile);
+  var poly = {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [bbox[0], bbox[3]],
+        [bbox[0], bbox[1]],
+        [bbox[2], bbox[1]],
+        [bbox[2], bbox[3]],
+        [bbox[0], bbox[3]]
+      ]
+    ]
+  };
+  return poly;
 }
 
 function tile2lon(x, z) {
-    return x / Math.pow(2, z) * 360 - 180;
+  return (x / 2 ** z) * 360 - 180;
 }
 
 function tile2lat(y, z) {
-    var n = Math.PI - 2 * Math.PI * y / Math.pow(2, z);
-    return r2d * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+  const n = Math.PI - (2 * Math.PI * y) / 2 ** z;
+  return r2d * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 }
 
 /**
@@ -64,14 +64,14 @@ function tile2lat(y, z) {
  * @param {number} z
  * @returns {Array<number>} tile
  * @example
- * var tile = pointToTile(1, 1, 20)
+ * const tile = pointToTile(1, 1, 20)
  * //=tile
  */
-function pointToTile(lon, lat, z) {
-    var tile = pointToTileFraction(lon, lat, z);
-    tile[0] = Math.floor(tile[0]);
-    tile[1] = Math.floor(tile[1]);
-    return tile;
+export function pointToTile(lon, lat, z) {
+  const tile = pointToTileFraction(lon, lat, z);
+  tile[0] = Math.floor(tile[0]);
+  tile[1] = Math.floor(tile[1]);
+  return tile;
 }
 
 /**
@@ -81,16 +81,16 @@ function pointToTile(lon, lat, z) {
  * @param {Array<number>} tile
  * @returns {Array<Array<number>>} tiles
  * @example
- * var tiles = getChildren([5, 10, 10])
+ * const tiles = getChildren([5, 10, 10])
  * //=tiles
  */
-function getChildren(tile) {
-    return [
-        [tile[0] * 2, tile[1] * 2, tile[2] + 1],
-        [tile[0] * 2 + 1, tile[1] * 2, tile[2 ] + 1],
-        [tile[0] * 2 + 1, tile[1] * 2 + 1, tile[2] + 1],
-        [tile[0] * 2, tile[1] * 2 + 1, tile[2] + 1]
-    ];
+export function getChildren(tile) {
+  return [
+    [tile[0] * 2, tile[1] * 2, tile[2] + 1],
+    [tile[0] * 2 + 1, tile[1] * 2, tile[2] + 1],
+    [tile[0] * 2 + 1, tile[1] * 2 + 1, tile[2] + 1],
+    [tile[0] * 2, tile[1] * 2 + 1, tile[2] + 1]
+  ];
 }
 
 /**
@@ -100,15 +100,11 @@ function getChildren(tile) {
  * @param {Array<number>} tile
  * @returns {Array<number>} tile
  * @example
- * var tile = getParent([5, 10, 10])
+ * const tile = getParent([5, 10, 10])
  * //=tile
  */
-function getParent(tile) {
-    return [tile[0] >> 1, tile[1] >> 1, tile[2] - 1];
-}
-
-function getSiblings(tile) {
-    return getChildren(getParent(tile));
+export function getParent(tile) {
+  return [tile[0] >> 1, tile[1] >> 1, tile[2] - 1];
 }
 
 /**
@@ -118,15 +114,30 @@ function getSiblings(tile) {
  * @param {Array<number>} tile
  * @returns {Array<Array<number>>} tiles
  * @example
- * var tiles = getSiblings([5, 10, 10])
+ * const tiles = getSiblings([5, 10, 10])
  * //=tiles
  */
-function hasSiblings(tile, tiles) {
-    var siblings = getSiblings(tile);
-    for (var i = 0; i < siblings.length; i++) {
-        if (!hasTile(tiles, siblings[i])) return false;
-    }
-    return true;
+export function getSiblings(tile) {
+  return getChildren(getParent(tile));
+}
+
+/**
+ * Check if a tile has all its siblings in a tiles array
+ *
+ * @name hasSiblings
+ * @param {Array<number>} tile
+ * @param {Array<Array<number>>} tiles
+ * @returns {boolean}
+ * @example
+ * const result = hasSiblings([5, 10, 10], tilesArray)
+ * //=result
+ */
+export function hasSiblings(tile, tiles) {
+  const siblings = getSiblings(tile);
+  for (let i = 0; i < siblings.length; i++) {
+    if (!hasTile(tiles, siblings[i])) return false;
+  }
+  return true;
 }
 
 /**
@@ -137,7 +148,7 @@ function hasSiblings(tile, tiles) {
  * @param {Array<number>} tile
  * @returns {boolean}
  * @example
- * var tiles = [
+ * const tiles = [
  *     [0, 0, 5],
  *     [0, 1, 5],
  *     [1, 1, 5],
@@ -146,11 +157,11 @@ function hasSiblings(tile, tiles) {
  * hasTile(tiles, [0, 0, 5])
  * //=boolean
  */
-function hasTile(tiles, tile) {
-    for (var i = 0; i < tiles.length; i++) {
-        if (tilesEqual(tiles[i], tile)) return true;
-    }
-    return false;
+export function hasTile(tiles, tile) {
+  for (let i = 0; i < tiles.length; i++) {
+    if (tilesEqual(tiles[i], tile)) return true;
+  }
+  return false;
 }
 
 /**
@@ -164,12 +175,8 @@ function hasTile(tiles, tile) {
  * tilesEqual([0, 1, 5], [0, 0, 5])
  * //=boolean
  */
-function tilesEqual(tile1, tile2) {
-    return (
-        tile1[0] === tile2[0] &&
-        tile1[1] === tile2[1] &&
-        tile1[2] === tile2[2]
-    );
+export function tilesEqual(tile1, tile2) {
+  return tile1[0] === tile2[0] && tile1[1] === tile2[1] && tile1[2] === tile2[2];
 }
 
 /**
@@ -179,19 +186,19 @@ function tilesEqual(tile1, tile2) {
  * @param {Array<number>} tile
  * @returns {string} quadkey
  * @example
- * var quadkey = tileToQuadkey([0, 1, 5])
+ * const quadkey = tileToQuadkey([0, 1, 5])
  * //=quadkey
  */
-function tileToQuadkey(tile) {
-    var index = '';
-    for (var z = tile[2]; z > 0; z--) {
-        var b = 0;
-        var mask = 1 << (z - 1);
-        if ((tile[0] & mask) !== 0) b++;
-        if ((tile[1] & mask) !== 0) b += 2;
-        index += b.toString();
-    }
-    return index;
+export function tileToQuadkey(tile) {
+  let index = '';
+  for (let z = tile[2]; z > 0; z--) {
+    let b = 0;
+    const mask = 1 << (z - 1);
+    if ((tile[0] & mask) !== 0) b++;
+    if ((tile[1] & mask) !== 0) b += 2;
+    index += b.toString();
+  }
+  return index;
 }
 
 /**
@@ -201,25 +208,25 @@ function tileToQuadkey(tile) {
  * @param {string} quadkey
  * @returns {Array<number>} tile
  * @example
- * var tile = quadkeyToTile('00001033')
+ * const tile = quadkeyToTile('00001033')
  * //=tile
  */
-function quadkeyToTile(quadkey) {
-    var x = 0;
-    var y = 0;
-    var z = quadkey.length;
+export function quadkeyToTile(quadkey) {
+  let x = 0;
+  let y = 0;
+  const z = quadkey.length;
 
-    for (var i = z; i > 0; i--) {
-        var mask = 1 << (i - 1);
-        var q = +quadkey[z - i];
-        if (q === 1) x |= mask;
-        if (q === 2) y |= mask;
-        if (q === 3) {
-            x |= mask;
-            y |= mask;
-        }
+  for (let i = z; i > 0; i--) {
+    const mask = 1 << (i - 1);
+    const q = +quadkey[z - i];
+    if (q === 1) x |= mask;
+    if (q === 2) y |= mask;
+    if (q === 3) {
+      x |= mask;
+      y |= mask;
     }
-    return [x, y, z];
+  }
+  return [x, y, z];
 }
 
 /**
@@ -229,32 +236,31 @@ function quadkeyToTile(quadkey) {
  * @param {Array<number>} bbox
  * @returns {Array<number>} tile
  * @example
- * var tile = bboxToTile([ -178, 84, -177, 85 ])
+ * const tile = bboxToTile([ -178, 84, -177, 85 ])
  * //=tile
  */
-function bboxToTile(bboxCoords) {
-    var min = pointToTile(bboxCoords[0], bboxCoords[1], 32);
-    var max = pointToTile(bboxCoords[2], bboxCoords[3], 32);
-    var bbox = [min[0], min[1], max[0], max[1]];
+export function bboxToTile(bboxCoords) {
+  const min = pointToTile(bboxCoords[0], bboxCoords[1], 32);
+  const max = pointToTile(bboxCoords[2], bboxCoords[3], 32);
+  const bbox = [min[0], min[1], max[0], max[1]];
 
-    var z = getBboxZoom(bbox);
-    if (z === 0) return [0, 0, 0];
-    var x = bbox[0] >>> (32 - z);
-    var y = bbox[1] >>> (32 - z);
-    return [x, y, z];
+  const z = getBboxZoom(bbox);
+  if (z === 0) return [0, 0, 0];
+  const x = bbox[0] >>> (32 - z);
+  const y = bbox[1] >>> (32 - z);
+  return [x, y, z];
 }
 
 function getBboxZoom(bbox) {
-    var MAX_ZOOM = 28;
-    for (var z = 0; z < MAX_ZOOM; z++) {
-        var mask = 1 << (32 - (z + 1));
-        if (((bbox[0] & mask) !== (bbox[2] & mask)) ||
-            ((bbox[1] & mask) !== (bbox[3] & mask))) {
-            return z;
-        }
+  const MAX_ZOOM = 28;
+  for (let z = 0; z < MAX_ZOOM; z++) {
+    const mask = 1 << (32 - (z + 1));
+    if ((bbox[0] & mask) !== (bbox[2] & mask) || (bbox[1] & mask) !== (bbox[3] & mask)) {
+      return z;
     }
+  }
 
-    return MAX_ZOOM;
+  return MAX_ZOOM;
 }
 
 /**
@@ -265,33 +271,18 @@ function getBboxZoom(bbox) {
  * @param {number} lat
  * @param {number} z
  * @returns {Array<number>} tile fraction
- * var tile = pointToTileFraction(30.5, 50.5, 15)
+ * @example
+ * const tile = pointToTileFraction(30.5, 50.5, 15)
  * //=tile
  */
-function pointToTileFraction(lon, lat, z) {
-    var sin = Math.sin(lat * d2r),
-        z2 = Math.pow(2, z),
-        x = z2 * (lon / 360 + 0.5),
-        y = z2 * (0.5 - 0.25 * Math.log((1 + sin) / (1 - sin)) / Math.PI);
+export function pointToTileFraction(lon, lat, z) {
+  const sin = Math.sin(lat * d2r);
+  const z2 = 2 ** z;
+  let x = z2 * (lon / 360 + 0.5);
+  const y = z2 * (0.5 - (0.25 * Math.log((1 + sin) / (1 - sin))) / Math.PI);
 
-    // Wrap Tile X
-    x = x % z2
-    if (x < 0) x = x + z2
-    return [x, y, z];
+  // Wrap Tile X
+  x = x % z2;
+  if (x < 0) x = x + z2;
+  return [x, y, z];
 }
-
-module.exports = {
-    tileToGeoJSON: tileToGeoJSON,
-    tileToBBOX: tileToBBOX,
-    getChildren: getChildren,
-    getParent: getParent,
-    getSiblings: getSiblings,
-    hasTile: hasTile,
-    hasSiblings: hasSiblings,
-    tilesEqual: tilesEqual,
-    tileToQuadkey: tileToQuadkey,
-    quadkeyToTile: quadkeyToTile,
-    pointToTile: pointToTile,
-    bboxToTile: bboxToTile,
-    pointToTileFraction: pointToTileFraction
-};
